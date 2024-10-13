@@ -62,7 +62,7 @@ At a high level, doing the conversion requires several manipulations:
 
 ## Provided to you
 
-The proj02 repository already contains some infrastructure to get you started, as follows:
+The proj02 repository already contains some infrastructure, in addition to the bit field utilities in bitFields.c, to get you started, as follows:
 
 ### floatx.h and floatx.c
 
@@ -125,7 +125,7 @@ Once you have the basics working, think about some other specifications and valu
    ```C
    union hexDouble {
      double dbl;
-     long lng;
+     unsigned long lng;
    } unionVal;   
    ```
 
