@@ -12,7 +12,7 @@ void clearBit(int bn,unsigned long * val){
   assert(bn >= 0 && bn < 64);
   *val &= ~BIT(bn);
 }
-void setBit(int bn,int new,unsigned long * val){
+void setBit(int bn,unsigned long new,unsigned long * val){
   assert(bn >= 0 && bn < 64);
   clearBit(bn,val);
   new &= 1;
