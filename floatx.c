@@ -25,7 +25,65 @@ floatx doubleToFloatx(double val,int totBits,int expBits) {
 ----------------------------------------------------------------------------------------------------*/
 
 	// First, make some assertions to ensure the totBits and expBits parameters are OK
+	assert(totBits >= 3 && totBits <= 64);
+    assert(expBits >= 1 && expBits <= totBits - 2);
 	// Then, implement the algorithm
 
-	return 0; // Remove this when you are done.
+    union converter{
+        double d;
+        unsigned long l;
+    } converter;
+
+    unsigned long floatx = 0;
+    
+    const int doubleExpBits = 11;
+    const int doubleFracBits = 52;
+    const int expBiasDouble = (1 << (doubleExpBits - 1)) - 1;
+    const int fracBits = totBits - expBits - 1; 
+    const int expBiasFloatx = (1 << (expBits - 1)) - 1;
+
+    converter.d = val;
+
+    int sign = getBit(63, converter.l);
+    unsigned long exponent = getBitFld(52, 11, converter.l);
+    unsigned long fraction = getBitFld(0, 52, converter.l);
+
+    setBit(totBits - 1, sign, &floatx);
+
+    int new_exponent;
+    if (exponent == 0) {
+        if (fraction == 0) {
+            new_exponent = 0;
+        } else {
+            new_exponent = 1 - expBiasDouble + expBiasFloatx;
+        }
+    } else if (exponent == 2047) {
+        new_exponent = (1 << expBits) - 1; 
+        fraction = (fraction == 0) ? 0 : (1UL << fracBits) - 1; 
+    } else {
+        new_exponent = (int)exponent - expBiasDouble + expBiasFloatx;
+        if (new_exponent >= (1 << expBits)) {
+            new_exponent = (1 << expBits) - 1;
+            fraction = 0;
+        } else if (new_exponent <= 0) {
+            if (new_exponent < -fracBits) {
+                new_exponent = 0;
+                fraction = 0;
+            } else {
+                fraction >>= (-new_exponent + 1);
+                new_exponent = 0;
+            }
+        }
+    }
+
+    setBitFld(totBits - expBits - 1, expBits, new_exponent, &floatx);
+
+    if (fracBits < doubleFracBits) {
+        fraction >>= (doubleFracBits - fracBits); 
+    } else {
+        fraction <<= (fracBits - doubleFracBits); 
+    }
+    setBitFld(0, fracBits, fraction, &floatx);
+
+    return floatx;
 }
